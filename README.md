@@ -1,7 +1,7 @@
 # wine-climate-api
 An API that analyzes climate data to determine the best regions for growing wine grapes.
 
-# Project Setup
+## Project Setup
 
 To get started with this project, follow the steps below:
 
@@ -19,3 +19,21 @@ To get started with this project, follow the steps below:
 
 4. Install project dependencies:
 `pip install -r requirements.txt`
+
+If you have issues installing psocopg2, you may need to install postgreSQL development libraries that provide the pg_config tool:
+`brew install postgresql` 
+`brew services start postgresql`
+(for Windows installation, go to https://www.postgresql.org/download/windows/)
+
+## Database Setup
+1. Ensure you have PostgreSQL running locally:
+ `brew services start postgresql`
+
+2. Run the setup_db.sh script to set up the local database with the password I provide:
+`./setup_db.sh`
+
+3. Configure the database URL:
+-Create a `.env` file and add the `DATABASE_URL` I provide
+
+4. Navigate to `<your repo location>/wine-climate-api/wine_climate` and run:
+`python manage.py migrate`
