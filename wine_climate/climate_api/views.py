@@ -6,6 +6,7 @@ from .serializers import WineRegionSerializer
 from .models import WineRegion
 from django.core.exceptions import ObjectDoesNotExist
 from .providers.climate_data import update_climate_data_for_all_regions
+from climate_api.services import calculate_climate_insights
 
 class WineRegionView(APIView):
     def get(self, request, *args, **kwargs):
@@ -19,9 +20,19 @@ class WineRegionView(APIView):
     
 class ClimateMetricsView(APIView):
     def get(self, request, *args, **kwargs):
-            update_data_response = update_climate_data_for_all_regions()
-            
-            if update_data_response is None:
-                return Response({"error": "Failed to fetch climate data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        update_data_response = update_climate_data_for_all_regions()
+        
+        if update_data_response is None:
+            return Response({"error": "Failed to fetch climate data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            return Response(update_data_response, status=status.HTTP_200_OK)
+        return Response(update_data_response, status=status.HTTP_200_OK)
+    
+class ClimateInsightsView(APIView):
+    def get(self, request, *args, **kwargs):
+        insights = calculate_climate_insights()
+
+        if insights is None:
+            return Response({"error": "Failed to fetch climate insights"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(insights, status=status.HTTP_200_OK)
+

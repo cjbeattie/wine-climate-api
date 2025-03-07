@@ -37,3 +37,8 @@ If you have issues installing psocopg2, you may need to install postgreSQL devel
 
 4. Navigate to `<your repo location>/wine-climate-api/wine_climate` and run:
 `python manage.py migrate`
+
+5. Run the Django server:
+`python manage.py runserver`
+
+6. Open Postman or your favourite API testing tool and fetch database using GET `http://127.0.0.1:8000/api/climate-metrics/`
