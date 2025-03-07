@@ -12,12 +12,12 @@ class WineRegion(models.Model):
 class ClimateMetrics(models.Model):
     wine_region = models.ForeignKey(WineRegion, on_delete=models.CASCADE, db_index=True)
     date = models.DateField()
-    temperature_mean = models.FloatField(max_digits=5, decimal_places=1)
+    temperature_mean = models.DecimalField(max_digits=5, decimal_places=1)
     relative_humidity_mean = models.IntegerField(
         null=True, 
         validators=[MinValueValidator(0), MaxValueValidator(100)]
     )
-    precipitation_sum = models.FloatField(max_digits=6, decimal_places=2)
+    precipitation_sum = models.DecimalField(max_digits=6, decimal_places=2)
 
     class Meta:
         indexes = [
