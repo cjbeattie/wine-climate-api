@@ -23,5 +23,6 @@ urlpatterns = [
 
     path('api/wine_regions/', views.WineRegionView.as_view()),
     path('api/climate-metrics/', views.ClimateMetricsView.as_view()),
-    path('api/climate-insights/', views.ClimateInsightsView.as_view())
+    path('api/climate-insights/', views.ClimateInsightsView.as_view()),
+    path('api/climate-insights/<region_id>', views.ClimateInsightsView.as_view())
 ]
