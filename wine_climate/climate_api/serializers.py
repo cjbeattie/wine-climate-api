@@ -26,7 +26,7 @@ class ClimateInsightsSerializer(serializers.ModelSerializer):
 class ClimateInsightsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClimateInsights
-        fields = "__all__"  # Keeps flexibility, but we override output below
+        fields = "__all__"
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

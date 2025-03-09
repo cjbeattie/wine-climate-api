@@ -5,6 +5,33 @@ from .serializers import WineRegionSerializer, ClimateInsightsSerializer
 from .models import WineRegion, ClimateInsights
 from climate_api.services import update_climate_data_for_all_regions, calculate_climate_insights_for_region
 
+
+    
+class ClimateInsightsView(APIView):
+    def get(self, request, *args, **kwargs):
+        region_id = kwargs.get('region_id', None)
+
+        try: 
+            if region_id is not None:
+                insights = ClimateInsights.objects.filter(wine_region=region_id).order_by("-created_at").first()
+                insights_serializer = ClimateInsightsSerializer(insights)
+            else:
+                insights = (
+                    ClimateInsights.objects.order_by("wine_region", "-created_at")
+                    .distinct("wine_region")
+                )
+                insights_serializer = ClimateInsightsSerializer(insights, many=True)
+
+            return Response(insights_serializer.data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"error": f"Failed to fetch climate insights: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ********
+# TESTING 
+# ********
+        
 class WineRegionView(APIView):
     # FOR TESTING: Simply returns the original list of wine regions
     def get(self, request, *args, **kwargs):
@@ -41,24 +68,3 @@ class ClimateCalculateInsightsForRegionView(APIView):
             return Response({"error": "Failed to calculate climate insights"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(calculate_climate_insights_response, status=status.HTTP_200_OK)
-    
-class ClimateInsightsView(APIView):
-    def get(self, request, *args, **kwargs):
-        region_id = kwargs.get('region_id', None)
-
-        try: 
-            if region_id is not None:
-                insights = ClimateInsights.objects.filter(wine_region=region_id).order_by("-created_at").first()
-                insights_serializer = ClimateInsightsSerializer(insights)
-            else:
-                insights = (
-                    ClimateInsights.objects.order_by("wine_region", "-created_at")
-                    .distinct("wine_region")
-                )
-                insights_serializer = ClimateInsightsSerializer(insights, many=True)
-
-            return Response(insights_serializer.data, status=status.HTTP_200_OK)
-        
-        except Exception as e:
-            return Response({"error": f"Failed to fetch climate insights: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-

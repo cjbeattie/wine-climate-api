@@ -27,7 +27,6 @@ class ClimateMetrics(models.Model):
             models.UniqueConstraint(fields=['wine_region', 'date'], name='unique_wine_region_date')
         ]
 
-
 class ClimateInsights(models.Model):
     wine_region = models.ForeignKey(WineRegion, on_delete=models.CASCADE, db_index=True)
     optimal_time_of_year_start_month = models.IntegerField(
@@ -36,9 +35,6 @@ class ClimateInsights(models.Model):
     optimal_time_of_year_end_month = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(12)], null=True, blank=True
     )
-    # performance_score_last_10_years = models.DecimalField(
-    #     max_digits=3, decimal_places=2, validators=[MinValueValidator(0.00), MaxValueValidator(1.00)]
-    # )
     past_10_years_winter_precipitation_total = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.00
     )

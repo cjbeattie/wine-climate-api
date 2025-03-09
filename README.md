@@ -46,6 +46,17 @@ If you have issues installing psocopg2, you may need to install postgreSQL devel
 
 
 ## Design decisions
+
+    # 1. "temperatures between 25 and 32 degrees Celsius" --> Calculate what percentage of each month has this temperature. Calculate percentage of summer months that has this temperature.
+    # 2. "balanced humidity and what months they are" --> Internet says 40%-70% is optimal humidity for grape growth. Calculate what percentage of each month is within this humidity range.
+    # 3. "long warm summers" --> covered in 1.
+    # 4. adequately rainy winters - calculate total rainfall for Jun - Aug
+
+    # optimal_time_of_year:  Seasonal Suitability: For each region, when is the best time of the year to grow grapes for wine production? --> (combo of points 1 and 2)
+    # performance_score_last_10_years: Historical Performance: Over the past 10 years, which region has historically experienced the worst climate conditions for grape cultivation? identify trends in adverse conditions over the past decade. --> 
+    # optimal_conditions_percentage_last_30_years: Long-term Viability: For each region, over a 30-year period, what percentage of that period can be expected to offer optimal conditions for grape production? determine the percentage of favorable years over a 30-year period
+
+    
 - Calculating optimal time of year is based on on ALL records in db, so a more accurate result may be calculated by having more history in the db
 - using ORM for aggregation of metrics, not loading heaps of data in memory
 - Not wanting to take an average per month, rather a percentage of days in range. Average not as useful as it discards the extremes.
