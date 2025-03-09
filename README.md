@@ -25,6 +25,8 @@ I felt it important for performance reasons to do the following:
 - Any time the user makes a request to the climate-insights endpoint, simply fetch the pre-calculated data from the `climate_insights` table.
 - A table that references all the listed `wine_regions` also exists to link all data via foreign key to the respective wine region.
 - Any aggregation functions are done at the database using Django's ORM rather than calculated in python code. This avoids unnecessary amounts of data being loaded into memory.
+- The database is optimized with indexing on frequently queried fields to improve query performance. Indexes are applied to foreign key relationships, date fields, and other commonly filtered columns to speed up lookups, filtering, and ordering while ensuring efficient data retrieval.
+- Caching has not been implemented, as this endpoint performs a simple database retrieval with no complex processing. However, it could still be beneficial in the future to improve response times and reduce database load as the service scales.
 
 
 ### Database Schema
@@ -255,3 +257,4 @@ or
 
 ## Known issues
 - The periodic task fetches and analyzes the climate data twice per iteration due to the current implementation. This occurs because both the background thread and the main server process trigger the task when the Django server starts. In a real-world implementation, this would typically be handled using Celery, which would allow for more reliable and scalable task scheduling, prevent multiple triggers, and ensure that background tasks are properly managed outside the request/response cycle.
+- Unit tests have not been implemented yet, but adding them would further improve reliability. You will see in urls.py and views.py that a few other endpoints are exposed for testing purposes.
