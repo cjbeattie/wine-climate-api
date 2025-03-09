@@ -21,8 +21,11 @@ from climate_api import views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    path('api/climate-insights/', views.ClimateInsightsView.as_view()),
+    path('api/climate-insights/<region_id>', views.ClimateInsightsView.as_view()),
+
+    # TESTING
     path('api/wine_regions/', views.WineRegionView.as_view()),
     path('api/climate-metrics/', views.ClimateMetricsView.as_view()),
-    path('api/climate-insights/', views.ClimateInsightsView.as_view()),
-    path('api/climate-insights/<region_id>', views.ClimateInsightsView.as_view())
+    path('api/calculate-climate-insights/<region_id>', views.ClimateCalculateInsightsForRegionView.as_view())
 ]

@@ -42,3 +42,11 @@ If you have issues installing psocopg2, you may need to install postgreSQL devel
 `python manage.py runserver`
 
 6. Open Postman or your favourite API testing tool and fetch database using GET `http://127.0.0.1:8000/api/climate-metrics/`
+
+
+
+## Design decisions
+- Calculating optimal time of year is based on on ALL records in db, so a more accurate result may be calculated by having more history in the db
+- using ORM for aggregation of metrics, not loading heaps of data in memory
+- Not wanting to take an average per month, rather a percentage of days in range. Average not as useful as it discards the extremes.
+- for caluclating the "optimal conditions percentage over last 30 years" I'll discard the rainfall measurement as "adequate rainy winters" isn't clearly defined
