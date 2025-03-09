@@ -25,8 +25,8 @@ I felt it important for performance reasons to do the following:
 - Any time the user makes a request to the climate-insights endpoint, simply fetch the pre-calculated data from the `climate_insights` table.
 - A table that references all the listed `wine_regions` also exists to link all data via foreign key to the respective wine region.
 - Any aggregation functions are done in the database using Django's ORM rather than calculated in python code. This avoids unnecessary amounts of data being loaded into memory.
-- The database is optimized with indexing on frequently queried fields to improve query performance. Indexes are applied to foreign key relationships, date fields, and other commonly filtered columns to speed up lookups, filtering, and ordering while ensuring efficient data retrieval.
-- Caching has not been implemented, as this endpoint performs a simple database retrieval with no complex processing. However, it could still be beneficial in the future to improve response times and reduce database load as the service scales.
+- The database is optimized with indexing on frequently-queried fields to improve query performance. Indexes are applied to foreign key relationships, date fields, and other commonly filtered columns to speed up lookups, filtering, and ordering while ensuring efficient data retrieval.
+- Caching has not been implemented, as this endpoint performs a simple database retrieval with no complex processing so it's probably overkill at this stage. However, it could still be beneficial in the future to improve response times and reduce database load as the service scales.
 
 
 ### Database Schema
@@ -44,6 +44,7 @@ Example:
     "end_month": 2
 },
 ```
+    With current data, I've come to the conclusion that **McLaren Vale, South Australia** slightly outperforms the others.
 2. **Historical Performance:** Over the past 10 years, which region has historically experienced the worst climate conditions for grape cultivation?
 - This is provided in the response as `performance_past_10_years` and broken down into `winter_precipitation_total`, `percentage_days_in_optimal_temp_range` and `percentage_days_in_optimal_humidity_range`. I considered combining these 3 metrics into a single score, but felt it too complex with my lack of grape knowledge.
 Example:
@@ -54,6 +55,7 @@ Example:
     "percentage_days_in_optimal_humidity_range": "38.15"
 },
 ```
+    With current data, it's difficult to pick a worst performer. Each have their pros and cons with regard to rain, temperature and humidity, so this may explain why different regions specialize in different grapes.
 3. **Long-term Viability:** For each region, over a 30-year period, what percentage of that period can be expected to offer optimal conditions for grape production?
 Ideal grape-growing conditions include temperatures between 25 and 32 degrees Celsius, balanced humidity, long warm summers, and adequately rainy winters.
 - For this metric I've calculated the percentage of days in the optimal temperature and humidity range for 30 years and then calculated the number of days where both of these overlap and returned this as a percentage of total days as `optimal_conditions_percentage_last_30_years`. I've dicarded "long warm summers" as the temperature measure already accounts for this well enough, and "adequately rainy winters" as this is vague and fairly complex. 
