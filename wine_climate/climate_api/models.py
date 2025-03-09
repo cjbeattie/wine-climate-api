@@ -31,16 +31,25 @@ class ClimateMetrics(models.Model):
 class ClimateInsights(models.Model):
     wine_region = models.ForeignKey(WineRegion, on_delete=models.CASCADE, db_index=True)
     optimal_time_of_year_start_month = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(12)]
+        validators=[MinValueValidator(1), MaxValueValidator(12)], null=True, blank=True
     )
     optimal_time_of_year_end_month = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(12)]
+        validators=[MinValueValidator(1), MaxValueValidator(12)], null=True, blank=True
     )
-    performance_score_last_10_years = models.DecimalField(
-        max_digits=3, decimal_places=2, validators=[MinValueValidator(0.00), MaxValueValidator(1.00)]
+    # performance_score_last_10_years = models.DecimalField(
+    #     max_digits=3, decimal_places=2, validators=[MinValueValidator(0.00), MaxValueValidator(1.00)]
+    # )
+    past_10_years_winter_precipitation_total = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00
     )
-    optimal_conditions_percentage_last_30_years = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
+    past_10_years_percentage_days_in_optimal_temp_range = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00), MaxValueValidator(1.00)], default=0.00
+    )
+    past_10_years_percentage_days_in_optimal_humidity_range = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00), MaxValueValidator(1.00)], default=0.00
+    )
+    optimal_conditions_percentage_last_30_years = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00), MaxValueValidator(1.00)], default=0.00
     )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 

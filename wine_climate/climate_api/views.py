@@ -48,14 +48,17 @@ class ClimateInsightsView(APIView):
 
         try: 
             if region_id is not None:
-                insights = ClimateInsights.objects.filter(wine_region=region_id)
+                insights = ClimateInsights.objects.filter(wine_region=region_id).order_by("-created_at").first()
             else:
-                insights = ClimateInsights.objects.all()
+                insights = (
+                    ClimateInsights.objects.order_by("wine_region", "-created_at")
+                    .distinct("wine_region")
+                )
 
             insights_serializer = ClimateInsightsSerializer(insights, many=True)
 
             return Response(insights_serializer.data, status=status.HTTP_200_OK)
         
-        except:
-            return Response({"error": "Failed to fetch climate insights"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error": f"Failed to fetch climate insights: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

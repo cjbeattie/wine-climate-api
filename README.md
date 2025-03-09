@@ -50,3 +50,6 @@ If you have issues installing psocopg2, you may need to install postgreSQL devel
 - using ORM for aggregation of metrics, not loading heaps of data in memory
 - Not wanting to take an average per month, rather a percentage of days in range. Average not as useful as it discards the extremes.
 - for caluclating the "optimal conditions percentage over last 30 years" I'll discard the rainfall measurement as "adequate rainy winters" isn't clearly defined
+
+## Known issues
+- The periodic task fetches and analyzes the climate data twice per iteration due to the current implementation. This occurs because both the background thread and the main server process trigger the task when the Django server starts. In a real-world implementation, this would typically be handled using Celery, which would allow for more reliable and scalable task scheduling, prevent multiple triggers, and ensure that background tasks are properly managed outside the request/response cycle.

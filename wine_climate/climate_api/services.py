@@ -1,6 +1,6 @@
 import requests
 from datetime import datetime, timedelta
-from climate_api.models import WineRegion, ClimateMetrics
+from climate_api.models import WineRegion, ClimateMetrics, ClimateInsights
 from django.db.models import Max, Sum
 from django.db import transaction
 from django.db.models import Count
@@ -274,6 +274,7 @@ def calculate_percentage_of_days_in_ideal_humidity_and_temperature_range_for_reg
         # Calculate the percentage of days in the ideal range
         percentage = (total_valid_days / total_total_days) * 100 if total_total_days else 0
 
+        # return percentage
         return round(percentage, 2)  # Round the percentage to two decimal places
 
     except Exception as e:
@@ -384,32 +385,23 @@ def calculate_climate_insights_for_region(region_id):
         end_date = datetime.today().date()
         start_date = end_date - timedelta(days=365 * 30)
 
-        percentage_of_days_in_ideal_humidity_and_temperature_range = calculate_percentage_of_days_in_ideal_humidity_and_temperature_range_for_region(region_id, start_date=start_date, end_date=end_date)
+        past_30_years_percentage_of_days_in_ideal_humidity_and_temperature_range = calculate_percentage_of_days_in_ideal_humidity_and_temperature_range_for_region(region_id, start_date=start_date, end_date=end_date)
         
             
-
-
         result = {
+            "region_id": region_id,
             "optimal_time_of_year_start_month": optimal_time_of_year_start_month,
             "optimal_time_of_year_end_month": optimal_time_of_year_end_month,
             "past_10_years_winter_precipitation_total": past_10_years_winter_precipitation_total,
             "past_10_years_percentage_days_in_optimal_temp_range": past_10_years_percentage_days_in_optimal_temp_range,
             "past_10_years_percentage_days_in_optimal_humidity_range": past_10_years_percentage_days_in_optimal_humidity_range,
-            "percentage_of_days_in_ideal_humidity_and_temperature_range": percentage_of_days_in_ideal_humidity_and_temperature_range,
+            "past_30_years_percentage_of_days_in_ideal_humidity_and_temperature_range": past_30_years_percentage_of_days_in_ideal_humidity_and_temperature_range,
         }
 
         return result
     
-
-
-
     except Exception as e:
         return (f'Error calculating climate insights for region id {region_id}: {e}')
-
-
-
-
-
 
 
 
@@ -419,8 +411,19 @@ def calculate_climate_insights_for_all_regions():
     try:
         regions = WineRegion.objects.all()
 
-        for region in regions:
-            calculate_climate_insights_for_region(region.id)
+        with transaction.atomic(): 
+            for region in regions:
+                insights = calculate_climate_insights_for_region(region.id)
+                ClimateInsights.objects.create(
+                    wine_region = region,
+                    optimal_time_of_year_start_month = insights["optimal_time_of_year_start_month"],
+                    optimal_time_of_year_end_month = insights["optimal_time_of_year_end_month"],
+                    past_10_years_winter_precipitation_total = insights["past_10_years_winter_precipitation_total"],
+                    past_10_years_percentage_days_in_optimal_temp_range = insights["past_10_years_percentage_days_in_optimal_temp_range"],
+                    past_10_years_percentage_days_in_optimal_humidity_range = insights["past_10_years_percentage_days_in_optimal_humidity_range"],
+                    optimal_conditions_percentage_last_30_years = insights["past_30_years_percentage_of_days_in_ideal_humidity_and_temperature_range"]
+
+                )
 
         print("Calculated climate insights for all regions")
 

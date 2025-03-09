@@ -13,11 +13,16 @@ from django.utils.timezone import now
 
 def run_periodically(interval):  # Interval in seconds (300s = 5 minutes)
     def task():
-        from climate_api.services import update_climate_data_for_all_regions
+        from climate_api.services import update_climate_data_for_all_regions, calculate_climate_insights_for_all_regions
         while True:
             print(f"Fetching latest metrics at {now()}")
             update_data_response = update_climate_data_for_all_regions()
             print(f"Fetching latest metrics response: {update_data_response}")
+
+            print("Calculating climate insights...")
+            insights_response = calculate_climate_insights_for_all_regions()
+            print(f"Climate insights calculation response: {insights_response}")
+
             time.sleep(interval)
 
     thread = threading.Thread(target=task, daemon=True)
