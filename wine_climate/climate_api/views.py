@@ -49,13 +49,13 @@ class ClimateInsightsView(APIView):
         try: 
             if region_id is not None:
                 insights = ClimateInsights.objects.filter(wine_region=region_id).order_by("-created_at").first()
+                insights_serializer = ClimateInsightsSerializer(insights)
             else:
                 insights = (
                     ClimateInsights.objects.order_by("wine_region", "-created_at")
                     .distinct("wine_region")
                 )
-
-            insights_serializer = ClimateInsightsSerializer(insights, many=True)
+                insights_serializer = ClimateInsightsSerializer(insights, many=True)
 
             return Response(insights_serializer.data, status=status.HTTP_200_OK)
         

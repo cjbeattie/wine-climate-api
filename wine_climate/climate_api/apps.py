@@ -6,6 +6,7 @@
 #     name = 'climate_api'
 
 import sys
+import os
 import threading
 import time
 from django.apps import AppConfig
@@ -34,5 +35,5 @@ class ClimateApiConfig(AppConfig):
 
     def ready(self):
         # Start the background task only if this is the main Django process
-        if not any(arg in ["makemigrations", "migrate", "shell"] for arg in sys.argv):
+        if not any(arg in ["makemigrations", "migrate", "shell", "test"] for arg in sys.argv):
             run_periodically(3600)

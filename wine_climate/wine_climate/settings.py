@@ -14,6 +14,7 @@ from pathlib import Path
 import dj_database_url
 import os
 from dotenv import load_dotenv
+import sys
 
 # Load environment variables from .env file
 load_dotenv()
@@ -92,6 +93,12 @@ DATABASES = {
     # }
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',  # SQLite in-memory DB for tests
+    }
 
 
 # Password validation
