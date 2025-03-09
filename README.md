@@ -229,13 +229,15 @@ If you have issues installing psocopg2, you may need to install postgreSQL devel
 
 ### Database Setup
 1. Ensure you have PostgreSQL running locally:  
- `brew services start postgresql`  
+ `brew services start postgresql`
 
 2. Run the setup_db.sh script to set up the local database with the password I provide:  
 `./setup_db.sh`  
+DB password: `wine_climate_db_pw`
 
 3. Configure the database URL:  
--Create a `.env` file and add the `DATABASE_URL` I provide  
+-Create a `.env` file and add the following:  
+`DATABASE_URL=postgres://wine_climate_db_user:wine_climate_db_pw@localhost:5432/wine_climate_db`  
 
 4. Navigate to `<your repo location>/wine-climate-api/wine_climate` and run:  
 `python manage.py migrate`  
@@ -245,7 +247,10 @@ If you have issues installing psocopg2, you may need to install postgreSQL devel
 1. Run the Django server:  
 `python manage.py runserver`  
 
-2. Open Postman or your favourite API testing tool and fetch database using GET `http://127.0.0.1:8000/api/climate-metrics/`  
+2. Open Postman or your favourite API testing tool and fetch database using GET  
+`http://127.0.0.1:8000/api/climate-insights/`  
+or  
+`http://127.0.0.1:8000/api/climate-insights/<region_id>`    
 
 ## Known issues
 - The periodic task fetches and analyzes the climate data twice per iteration due to the current implementation. This occurs because both the background thread and the main server process trigger the task when the Django server starts. In a real-world implementation, this would typically be handled using Celery, which would allow for more reliable and scalable task scheduling, prevent multiple triggers, and ensure that background tasks are properly managed outside the request/response cycle.
