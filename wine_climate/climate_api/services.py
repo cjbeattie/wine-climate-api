@@ -24,8 +24,8 @@ def update_climate_data_for_all_regions():
         # Check db to see which dates we have records for. Get whatever is missing in the last 30 years from today.
 
         # Firstly, figure out start_date and end_date
-        last_record = ClimateMetrics.objects.filter().aggregate(Max('date'))
-        last_fetched_date = last_record['date__max']
+        last_record = ClimateMetrics.objects.filter().aggregate(Max('metric_date'))
+        last_fetched_date = last_record['metric_date__max']
 
         if not last_fetched_date:
             start_date = datetime.now() - timedelta(days=30*365)  # 30 years ago
@@ -46,10 +46,7 @@ def update_climate_data_for_all_regions():
         if isinstance(start_date, datetime):
             start_date = start_date.date()
         if isinstance(end_date, datetime):
-            end_date = end_date.date()
-
-        print(f"Start date is {start_date}")
-        print(f"End date is {end_date}")            
+            end_date = end_date.date()        
 
         if start_date > end_date:
             raise ValueError("Start date is later than end date.")
@@ -74,12 +71,12 @@ def update_climate_data_for_all_regions():
 
                     # Ensure all lists have the same length (they should, but just in case)
                     if len(dates) == len(temperature) == len(humidity) == len(precipitation):
-                        existing_dates = set(ClimateMetrics.objects.filter(wine_region=region).values_list('date', flat=True))
+                        existing_dates = set(ClimateMetrics.objects.filter(wine_region=region).values_list('metric_date', flat=True))
                         for i in range(len(dates)):
                             if dates[i] not in existing_dates:
                                 ClimateMetrics.objects.create(
                                     wine_region=region,
-                                    date=dates[i],
+                                    metric_date=dates[i],
                                     temperature_mean=temperature[i],
                                     relative_humidity_mean=humidity[i],
                                     precipitation_sum=precipitation[i]
@@ -115,13 +112,13 @@ def calculate_percentage_of_days_in_ideal_temp_range_by_month_for_region(region_
         # Base queryset with optional date filtering
         base_queryset = ClimateMetrics.objects.filter(wine_region_id=region_id)
         if start_date and end_date:
-            base_queryset = base_queryset.filter(date__range=[start_date, end_date])
+            base_queryset = base_queryset.filter(metric_date__range=[start_date, end_date])
 
         # Query to get the number of days in range for each month
         days_in_range_query = (
             base_queryset
             .filter(temperature_mean__gte=temp_min, temperature_mean__lte=temp_max)
-            .annotate(month=ExtractMonth('date'))
+            .annotate(month=ExtractMonth('metric_date'))
             .values('month')
             .annotate(days_in_range=Count('id'))
             .order_by('month')
@@ -130,7 +127,7 @@ def calculate_percentage_of_days_in_ideal_temp_range_by_month_for_region(region_
         # Query to get the total number of days for each month
         total_days_query = (
             base_queryset
-            .annotate(month=ExtractMonth('date'))
+            .annotate(month=ExtractMonth('metric_date'))
             .values('month')
             .annotate(total_days=Count('id'))
             .order_by('month')
@@ -168,13 +165,13 @@ def calculate_percentage_of_days_in_ideal_humidity_range_by_month_for_region(reg
         # Base queryset with optional date filtering
         base_queryset = ClimateMetrics.objects.filter(wine_region_id=region_id)
         if start_date and end_date:
-            base_queryset = base_queryset.filter(date__range=[start_date, end_date])
+            base_queryset = base_queryset.filter(metric_date__range=[start_date, end_date])
 
         # Query to get the number of days in range for each month
         days_in_range_query = (
             base_queryset
             .filter(relative_humidity_mean__gte=humidity_min, relative_humidity_mean__lte=humidity_max)
-            .annotate(month=ExtractMonth('date'))
+            .annotate(month=ExtractMonth('metric_date'))
             .values('month')
             .annotate(days_in_range=Count('id'))
             .order_by('month')
@@ -183,7 +180,7 @@ def calculate_percentage_of_days_in_ideal_humidity_range_by_month_for_region(reg
         # Query to get the total number of days for each month
         total_days_query = (
             base_queryset
-            .annotate(month=ExtractMonth('date'))
+            .annotate(month=ExtractMonth('metric_date'))
             .values('month')
             .annotate(total_days=Count('id'))
             .order_by('month')
@@ -218,9 +215,9 @@ def calculate_total_precipitation_for_winter_for_region(region_id, start_date=No
         winter_months = [6, 7, 8]  # June, July, August
 
         # Base queryset with optional date filtering
-        base_queryset = ClimateMetrics.objects.filter(wine_region_id=region_id, date__month__in=winter_months)
+        base_queryset = ClimateMetrics.objects.filter(wine_region_id=region_id, metric_date__month__in=winter_months)
         if start_date and end_date:
-            base_queryset = base_queryset.filter(date__range=[start_date, end_date])
+            base_queryset = base_queryset.filter(metric_date__range=[start_date, end_date])
 
         # Aggregate total precipitation
         total_precipitation = base_queryset.aggregate(total_rainfall=Sum('precipitation_sum'))['total_rainfall'] or 0
@@ -241,14 +238,14 @@ def calculate_percentage_of_days_in_ideal_humidity_and_temperature_range_for_reg
         # Base queryset with optional date filtering
         base_queryset = ClimateMetrics.objects.filter(wine_region_id=region_id)
         if start_date and end_date:
-            base_queryset = base_queryset.filter(date__range=[start_date, end_date])
+            base_queryset = base_queryset.filter(metric_date__range=[start_date, end_date])
 
         # Query to get the number of days where both temperature and humidity are in the ideal range
         valid_days_query = (
             base_queryset
             .filter(temperature_mean__gte=temp_min, temperature_mean__lte=temp_max)
             .filter(relative_humidity_mean__gte=humidity_min, relative_humidity_mean__lte=humidity_max)
-            .annotate(month=ExtractMonth('date'))
+            .annotate(month=ExtractMonth('metric_date'))
             .values('month')
             .annotate(valid_days=Count('id'))  # Count only days where both conditions are met
             .order_by('month')
@@ -257,7 +254,7 @@ def calculate_percentage_of_days_in_ideal_humidity_and_temperature_range_for_reg
         # Query to get the total number of days for the given date range
         total_days_query = (
             base_queryset
-            .annotate(month=ExtractMonth('date'))
+            .annotate(month=ExtractMonth('metric_date'))
             .values('month')
             .annotate(total_days=Count('id'))
             .order_by('month')

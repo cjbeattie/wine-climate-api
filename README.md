@@ -16,9 +16,10 @@ An API that analyzes climate data to determine the best regions for growing wine
 
 ## Design Approach
 I have created a simple endpoint that provides insights into the optimal growing conditions for wine in each of the provided wine regions. The user can optionally provide a region ID to retrieve insights for a single region.
+The solution was created using Django with Django REST Framework and a PostgreSQL database.
 
 I felt it important for performance reasons to do the following:
-- Since data from Open Meteo Climate API is by day, set an offline task to retrieve new metrics once a day and store in a table called `climate_metrics`.
+- Since data from [Open Meteo Climate API](https://open-meteo.com/en/docs/climate-api) is by day, set an offline task to retrieve new metrics once a day and store in a table called `climate_metrics`.
 - Only retrive climate metrics for days that haven't been fetched yet in the last 30 years. Initial fetch will be quite large and will retrieve records for the last 30 years, but subsequent calls should only be one day's worth of data to fetch.
 - Once those metrics have been fetched, run the algorithms that calculate the insights and store the results in a separate table called `climate_insights`. Insights SHOULD NOT be calculated when the user hits the endpoint. There's no point - metrics data is only updated once per day, so there's no need to recaluclate on every request as the insights should only change once a day.
 - Any time the user makes a request to the climate-insights endpoint, simply fetch the pre-calculated data from the `climate_insights` table.
@@ -37,19 +38,19 @@ This calculation is based on *all* records in the database as a time frame wasn'
 Example:
 ```json
 "optimal_time_of_year": {
-        "start_month": 1,
-        "end_month": 2
-    },
+    "start_month": 1,
+    "end_month": 2
+},
 ```
 2. **Historical Performance:** Over the past 10 years, which region has historically experienced the worst climate conditions for grape cultivation?
 - This is provided in the response as `performance_past_10_years` and broken down into `winter_precipitation_total`, `percentage_days_in_optimal_temp_range` and `percentage_days_in_optimal_humidity_range`. I considered combining these 3 metrics into a single score, but felt it too complex with my lack of grape knowledge.
 Example:
 ```json
 "performance_past_10_years": {
-        "winter_precipitation_total": "2125.36",
-        "percentage_days_in_optimal_temp_range": "5.15",
-        "percentage_days_in_optimal_humidity_range": "38.15"
-    },
+    "winter_precipitation_total": "2125.36",
+    "percentage_days_in_optimal_temp_range": "5.15",
+    "percentage_days_in_optimal_humidity_range": "38.15"
+},
 ```
 3. **Long-term Viability:** For each region, over a 30-year period, what percentage of that period can be expected to offer optimal conditions for grape production?
 Ideal grape-growing conditions include temperatures between 25 and 32 degrees Celsius, balanced humidity, long warm summers, and adequately rainy winters.
@@ -222,7 +223,7 @@ To get started with this project, follow the steps below:
 4. Install project dependencies:  
 `pip install -r requirements.txt`  
 
-If you have issues installing psocopg2, you may need to install postgreSQL development libraries that provide the pg_config tool:  
+    If you have issues installing psocopg2, you may need to install postgreSQL development libraries that provide the pg_config tool:  
 `brew install postgresql`  
 `brew services start postgresql`  
 (for Windows installation, go to https://www.postgresql.org/download/windows/)  

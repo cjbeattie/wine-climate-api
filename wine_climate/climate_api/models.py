@@ -11,7 +11,7 @@ class WineRegion(models.Model):
 
 class ClimateMetrics(models.Model):
     wine_region = models.ForeignKey(WineRegion, on_delete=models.CASCADE, db_index=True)
-    date = models.DateField()
+    metric_date = models.DateField()
     temperature_mean = models.DecimalField(max_digits=5, decimal_places=1)
     relative_humidity_mean = models.IntegerField(
         null=True, 
@@ -21,10 +21,10 @@ class ClimateMetrics(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['wine_region', 'date']),
+            models.Index(fields=['wine_region', 'metric_date']),
         ]
         constraints = [
-            models.UniqueConstraint(fields=['wine_region', 'date'], name='unique_wine_region_date')
+            models.UniqueConstraint(fields=['wine_region', 'metric_date'], name='unique_wine_region_metric_date')
         ]
 
 class ClimateInsights(models.Model):
