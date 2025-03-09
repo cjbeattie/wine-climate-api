@@ -1,13 +1,26 @@
 # Wine Climate API
 An API that analyzes climate data to determine the best regions for growing wine grapes.
 
+- [Wine Climate API](#wine-climate-api)
+  * [Design Approach](#design-approach)
+    + [Database Schema](#database-schema)
+    + [Addressing Requirements](#addressing-requirements)
+  * [API Documentation](#api-documentation)
+    + [Base URL](#base-url)
+    + [Endpoints](#endpoints)
+  * [Project Setup](#project-setup)
+    + [Clone and install](#clone-and-install)
+    + [Database Setup](#database-setup)
+    + [Run the Server](#run-the-server)
+  * [Known issues](#known-issues)
+
 ## Design Approach
 I have created a simple endpoint that provides insights into the optimal growing conditions for wine in each of the provided wine regions. The user can optionally provide a region ID to retrieve insights for a single region.
 
 I felt it important for performance reasons to do the following:
 - Since data from Open Meteo Climate API is by day, set an offline task to retrieve new metrics once a day and store in a table called `climate_metrics`.
 - Only retrive climate metrics for days that haven't been fetched yet in the last 30 years. Initial fetch will be quite large and will retrieve records for the last 30 years, but subsequent calls should only be one day's worth of data to fetch.
-- Once those metrics have been fetched, run the algorithms that calculate the insights and store the results in a separate table called `climate_insights`. Insights SHOULD NOT be calculated when the user hits the endpoint. There's no point - metrics data is only updated once per day, so there's no need to recaluclate on every request.
+- Once those metrics have been fetched, run the algorithms that calculate the insights and store the results in a separate table called `climate_insights`. Insights SHOULD NOT be calculated when the user hits the endpoint. There's no point - metrics data is only updated once per day, so there's no need to recaluclate on every request as the insights should only change once a day.
 - Any time the user makes a request to the climate-insights endpoint, simply fetch the pre-calculated data from the `climate_insights` table.
 - A table that references all the listed `wine_regions` also exists to link all data via foreign key to the respective wine region.
 - Any aggregation functions are done at the database using Django's ORM rather than calculated in python code. This avoids unnecessary amounts of data being loaded into memory.
@@ -16,30 +29,35 @@ I felt it important for performance reasons to do the following:
 ### Database Schema
 ![My Image](images/DBSchema.png)
 
-### Addressing Requirements - ******************WIP
-Several assumptions were made which would normally be business decisions, and the appropriate channels consulted. However for the sake of this test I have made the following decisions:
-- When calculating 
-
-
-
-1. "temperatures between 25 and 32 degrees Celsius" --> Calculate what percentage of each month has this temperature. Calculate percentage of summer months that has this temperature.
-2. "balanced humidity and what months they are" --> Internet says 40%-70% is optimal humidity for grape growth. Calculate what percentage of each month is within this humidity range.
-3. "long warm summers" --> covered in 1.
-4. adequately rainy winters - calculate total rainfall for Jun - Aug
-
-optimal_time_of_year:  Seasonal Suitability: For each region, when is the best time of the year to grow grapes for wine production? --> (combo of points 1 and 2)
-performance_score_last_10_years: Historical Performance: Over the past 10 years, which region has historically experienced the worst climate conditions for grape cultivation? identify trends in adverse conditions over the past decade. --> 
-optimal_conditions_percentage_last_30_years: Long-term Viability: For each region, over a 30-year period, what percentage of that period can be expected to offer optimal conditions for grape production? determine the percentage of favorable years over a 30-year period
-
-- Calculating optimal time of year is based on on ALL records in db, so a more accurate result may be calculated by having more history in the db
-- using ORM for aggregation of metrics, not loading heaps of data in memory
-- Not wanting to take an average per month, rather a percentage of days in range. Average not as useful as it discards the extremes.
-- for caluclating the "optimal conditions percentage over last 30 years" I'll discard the rainfall measurement as "adequate rainy winters" isn't clearly defined
-
-
-
-
-
+### Addressing Requirements
+*n.b. Several assumptions were made which would normally be business decisions, and the appropriate channels consulted, however for the sake of the test I have instead continued with the assumtions and noted them below.*
+1. **Seasonal Suitability:** For each region, when is the best time of the year to grow grapes for wine production?
+- In the API response I've provided the optimal time of year `start_month` and `end_month`. Firstly I calculated the percentage of days in the ideal temp (25-32 degrees C) and humidity (40%-70% - the internet says this is ideal for grape growth) and grouped these by month. This is better than calculating the average per months as it doesn't account for the extremes. I then set what the threshold is for what would be considered "optimal" per month in terms of the *percentage of days that falls within this range*, this was totally arbitrary on my side and I'd normally consult business for this, but for now I've set the temperature days-in-range-per-month threshold to 15 and humidity days-in-range-per-month threshold to 30. I have assumed that optimal time of year may contain months that aren't optimal, i.e. optimal months don't have to be contiguous.
+This calculation is based on *all* records in the database as a time frame wasn't specified, so a more accurate result may be calculated by having more history in the database.
+Example:
+```json
+"optimal_time_of_year": {
+        "start_month": 1,
+        "end_month": 2
+    },
+```
+2. **Historical Performance:** Over the past 10 years, which region has historically experienced the worst climate conditions for grape cultivation?
+- This is provided in the response as `performance_past_10_years` and broken down into `winter_precipitation_total`, `percentage_days_in_optimal_temp_range` and `percentage_days_in_optimal_humidity_range`. I considered combining these 3 metrics into a single score, but felt it too complex with my lack of grape knowledge.
+Example:
+```json
+"performance_past_10_years": {
+        "winter_precipitation_total": "2125.36",
+        "percentage_days_in_optimal_temp_range": "5.15",
+        "percentage_days_in_optimal_humidity_range": "38.15"
+    },
+```
+3. **Long-term Viability:** For each region, over a 30-year period, what percentage of that period can be expected to offer optimal conditions for grape production?
+Ideal grape-growing conditions include temperatures between 25 and 32 degrees Celsius, balanced humidity, long warm summers, and adequately rainy winters.
+- For this metric I've calculated the percentage of days in the optimal temperature and humidity range for 30 years and then calculated the number of days where both of these overlap and returned this as a percentage of total days as `optimal_conditions_percentage_last_30_years`. I've dicarded "long warm summers" as the temperature measure already accounts for this well enough, and "adequately rainy winters" as this is vague and fairly complex. 
+Example:
+```json
+"optimal_conditions_percentage_last_30_years": "2.26"
+```
 
 ## API Documentation
 This API provides insights into climate conditions for wine regions based on historical climate data.
