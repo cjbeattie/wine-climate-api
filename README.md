@@ -1,6 +1,8 @@
 # wine-climate-api
 An API that analyzes climate data to determine the best regions for growing wine grapes.
 
+![My Image](images/DBSchema.png)
+
 ## Project Setup
 
 To get started with this project, follow the steps below:
@@ -56,7 +58,7 @@ If you have issues installing psocopg2, you may need to install postgreSQL devel
     # performance_score_last_10_years: Historical Performance: Over the past 10 years, which region has historically experienced the worst climate conditions for grape cultivation? identify trends in adverse conditions over the past decade. --> 
     # optimal_conditions_percentage_last_30_years: Long-term Viability: For each region, over a 30-year period, what percentage of that period can be expected to offer optimal conditions for grape production? determine the percentage of favorable years over a 30-year period
 
-    
+
 - Calculating optimal time of year is based on on ALL records in db, so a more accurate result may be calculated by having more history in the db
 - using ORM for aggregation of metrics, not loading heaps of data in memory
 - Not wanting to take an average per month, rather a percentage of days in range. Average not as useful as it discards the extremes.
