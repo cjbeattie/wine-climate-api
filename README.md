@@ -12,7 +12,7 @@ An API that analyzes climate data to determine the best regions for growing wine
     + [Clone and install](#clone-and-install)
     + [Database Setup](#database-setup)
     + [Run the Server](#run-the-server)
-  * [Known issues](#known-issues)
+  * [Known issues and still TO DOs](#known-issues-and-still-to-dos)
 
 ## Design Approach
 I have created a simple endpoint that provides insights into the optimal growing conditions for wine in each of the provided wine regions. The user can optionally provide a region ID to retrieve insights for a single region.
@@ -255,6 +255,7 @@ DB password: `wine_climate_db_pw`
 or  
 `http://127.0.0.1:8000/api/climate-insights/<region_id>`    
 
-## Known issues
+## Known issues and still TO DOs
 - The periodic task fetches and analyzes the climate data twice per iteration due to the current implementation. This occurs because both the background thread and the main server process trigger the task when the Django server starts. In a real-world implementation, this would typically be handled using Celery, which would allow for more reliable and scalable task scheduling, prevent multiple triggers, and ensure that background tasks are properly managed outside the request/response cycle.
 - Unit tests have not been implemented yet, but adding them would further improve reliability. You will see in urls.py and views.py that a few other endpoints are exposed for testing purposes.
+- Error handling is implemented, but it's currently quite basic and generally follows a catch-all approach, rather than being tailored to handle specific scenarios individually.
