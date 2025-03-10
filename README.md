@@ -35,7 +35,7 @@ I felt it important for performance reasons to do the following:
 ### Addressing Requirements
 *n.b. Several assumptions were made which would normally be business decisions, and the appropriate channels consulted, however for the sake of the test I have instead continued with the assumtions and noted them below.*
 1. **Seasonal Suitability:** For each region, when is the best time of the year to grow grapes for wine production?
-- In the API response I've provided the optimal time of year `start_month` and `end_month`. Firstly I calculated the percentage of days in the ideal temp (25-32 degrees C) and humidity (40%-70% - the internet says this is ideal for grape growth) and grouped these by month. This is better than calculating the average per months as it doesn't account for the extremes. I then set what the threshold is for what would be considered "optimal" per month in terms of the *percentage of days that falls within this range*, this was totally arbitrary on my side and I'd normally consult business for this, but for now I've set the temperature days-in-range-per-month threshold to 15 and humidity days-in-range-per-month threshold to 30. I have assumed that optimal time of year may contain months that aren't optimal, i.e. optimal months don't have to be contiguous.
+- In the API response I've provided the optimal time of year `start_month` and `end_month`. Firstly I calculated the percentage of days in the ideal temperature range (25-32 degrees C) and humidity range (40%-70% - the internet says this is ideal for grape growth) and grouped these by month. This is better than calculating the average per months as it doesn't account for the extremes. I then set what the threshold is for what would be considered "optimal" per month in terms of the *percentage of days that falls within this range*, this was totally arbitrary on my side and I'd normally consult business for this, but for now I've set the temperature days-in-range-per-month threshold to 15 and humidity days-in-range-per-month threshold to 30. I have assumed that optimal time of year may contain months that aren't optimal, i.e. optimal months don't have to be contiguous.
 This calculation is based on *all* records in the database as a time frame wasn't specified, so a more accurate result may be calculated by having more history in the database.  
 With current data, I've come to the conclusion that **McLaren Vale, South Australia** slightly outperforms the others.  
 **Example response:**
@@ -58,7 +58,7 @@ With current data, it's difficult to pick a worst performer. Each have their pro
 ```
 3. **Long-term Viability:** For each region, over a 30-year period, what percentage of that period can be expected to offer optimal conditions for grape production?
 Ideal grape-growing conditions include temperatures between 25 and 32 degrees Celsius, balanced humidity, long warm summers, and adequately rainy winters.
-- For this metric I've calculated the percentage of days in the optimal temperature and humidity range for 30 years and then calculated the number of days where both of these overlap and returned this as a percentage of total days as `optimal_conditions_percentage_last_30_years`. I've dicarded "long warm summers" as the temperature measure already accounts for this well enough, and "adequately rainy winters" as this is vague and fairly complex.  
+- For this insight I've calculated the percentage of days in the optimal temperature and humidity range for 30 years and then calculated the number of days where both of these overlap and returned this as a percentage of total days as `optimal_conditions_percentage_last_30_years`. I've dicarded "long warm summers" as the temperature measure already accounts for this well enough, and "adequately rainy winters" as it is vague what "adequate" means here. The total winter precipitation is available in point 2 regardless.  
 **Example response:**
 ```json
 "optimal_conditions_percentage_last_30_years": "2.26"
@@ -236,9 +236,9 @@ To get started with this project, follow the steps below:
 1. Ensure you have PostgreSQL running locally:  
  `brew services start postgresql`
 
-2. Run the setup_db.sh script to set up the local database with the password I provide:  
+2. Run the setup_db.sh script to set up the local database:  
 `./setup_db.sh`  
-DB password: `wine_climate_db_pw`
+DB password: `wine_climate_db_pw` (normally I would not be committing this to github but for this test it's fine)
 
 3. Configure the database URL:  
 -Create a `.env` file and add the following:  
